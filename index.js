@@ -20,6 +20,17 @@ app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
 
+//Add Administrator web app Routes 
 var admin= require("./routes/adminRoutes");
+app.use("/adminRoutes", admin); 
 
-app.use("/adminRoutes",admin); 
+// //Add Bus tacking app routes
+var busTrack = require("./routes/bustrackingRoutes");
+app.use("/bustrackingRoutes", busTrack);
+
+//Add TIM user app routes
+var timUser = require("./routes/timuserRoutes");
+app.use("/timuserRoutes", timUser);
+
+
+
