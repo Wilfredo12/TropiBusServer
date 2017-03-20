@@ -42,12 +42,12 @@ Create:
 var express = require("express");
 var router= express.Router();
 var pg = require("pg");
-const database_URL="put url here"
+const database_URL=  'postgres://wymxggcwikpwav:203bccfd54e249de1659cdcb1d99cac0f82a14eb9246b51bbef0c1598c46089d@ec2-54-83-205-71.compute-1.amazonaws.com:5432/dd0arpc8l5k2be'
 pg.defaults.ssl=true;
 
 //Routes for gets
 var getAllRoutes = 'SELECT * FROM Route'
-var getRoute = 'SELECT * FROM Route NATURAL JOIN Path WHERE route_ID=$1'
+var getRoute = 'SELECT * FROM Route WHERE route_ID=$1'
 var getAllStops = 'SELECT * FROM Stop' 
 var getNearestStop 
 var getStopsFromRoute = 'SELECT * FROM Stop WHERE route_ID=$1'
@@ -72,7 +72,7 @@ var deleteBus = 'DELETE FROM Bus WHERE bus_ID=$1'
 var deleteMessage = 'DELETE FROM Message WHERE message_ID=$1'
 
 //Routes for create
-var createDriver = 'INSERT INTO Driver(driver_first_name, driver_last_name) VALUES ($1,$2)'
+var createDriver = 'INSERT INTO Driver(diver_ID, driver_first_name, driver_last_name, driver_user_name, driver_password, driver-status) VALUES ($1,$2,$3,$4,$5,$6)'
 var createBus = 'INSERT INTO Bus(bus_name, driver_ID, route_ID, gps_ID) VALUES ($1,$2,$3,$4)'
 var createRoute = ''
 var createStop = 'INSERT INTO Stop(stop_title, stop_description, stop_latitude, stop_longitude) VALUES ($1,$2,$3,$4)'
@@ -299,7 +299,7 @@ router.post('/addMessage', function(req, res, next) {
 router.post('/createDriver', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(createDriver,[res.body.driver_first_name, res.body.driver_last_name] ,function(err, result) {
+        client.query(createDriver,[res.body.driver_ID,res.body.driver_first_name, res.body.driver_last_name,res.body.driver_first_name,res.body.driver_last_name,res.body.driver_status] ,function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
