@@ -55,6 +55,9 @@ var getBusLocation = 'SELECT bus_latitude, bus_longitude FROM Bus NATURAL JOIN G
 var getMessages = 'SELECT * FROM Message'
 var getBuses = 'SELECT * FROM Bus'
 
+
+var getAdmin = 'SELECT * FROM administrator WHERE admin_ID=$1'
+
 //Routes for Update
 var updateStop = 'UPDATE Stop SET stop_name=$1, stop_description=$2 WHERE stop_ID=$3'
 var updateRoute = 'UPDATE Route SET route_name=$1, route_description=$2 WHERE route_ID=$3'
@@ -73,9 +76,12 @@ var deleteMessage = 'DELETE FROM Message WHERE message_ID=$1'
 
 //Routes for create
 var createDriver = 'INSERT INTO Driver(diver_ID, driver_first_name, driver_last_name, driver_user_name, driver_password, driver-status) VALUES ($1,$2,$3,$4,$5,$6)'
-var createBus = 'INSERT INTO Bus(bus_name, driver_ID, route_ID, gps_ID) VALUES ($1,$2,$3,$4)'
-var createRoute = ''
-var createStop = 'INSERT INTO Stop(stop_title, stop_description, stop_latitude, stop_longitude) VALUES ($1,$2,$3,$4)'
+var createBus = 'INSERT INTO bus(bus_name, driver_ID, route_ID, gps_ID) VALUES ($1,$2,$3,$4)'
+var createRoute = 'INSERT INTO route(route_ID, route_name, route_description) VALUES ($1,$2,$3)'
+
+var createStop = 'INSERT INTO Stop(stop_ID,stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4,$5)'
+
+//var getAdmin = 'SELECT * FROM administrator WHERE admin_id=$1'
 
 
 //Routes for gets 
@@ -193,7 +199,7 @@ router.put('/updateStop', function(req, res, next) {
         client.query(updateStop,[res.body.stop_name, res.body.stop_description, stop_ID] ,function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
+             { console.error(err); response.send("Error" + err); }
             else
             res.json(result.rows);
             console.log(result.rows)
@@ -253,7 +259,7 @@ router.put('/updateMessage', function(req, res, next) {
         client.query(updateMessage,[res.body.mesagge_text, message_ID] ,function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
+             { console.error(err); response.send("Error" + err); }
             else
             res.json(result.rows);
             console.log(result.rows)
@@ -267,15 +273,18 @@ router.put('/updateMessage', function(req, res, next) {
 //Routes for Add
 
 router.post('/createStop', function(req, res, next) {
+    console.log('holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(createStop,[res.body.stop_title, res.body.stop_description, res.body.stop_latitude, res.body.stop_longitude] ,function(err, result) {
-
+        client.query(createStop,[0,'Parada','prueba',0,0] ,function(err, result) {
+            //req.body.stop_ID, req.body.stop_description, req.body.stop_latitude, req.body.stop_longitude
+            console.log('holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
+             { console.error(err); response.send("Error" + err); }
             else
             res.json(result.rows);
             console.log(result.rows)
+            Console.log("no sale")
             done();
         });
     });
@@ -326,31 +335,16 @@ router.post('/createBus', function(req, res, next) {
     });
 });
 
-router.post('/createStop', function(req, res, next) {
-    console.log(req.body)
-    pg.connect(database_URL, function(err, client, done) {
-        client.query(createStop,[res.body.stop_title, res.body.stop_description, res.body.stop_latitude, res.body.stop_longitude] ,function(err, result) {
-
-            if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
-            done();
-        });
-    });
-});
-
 
 //Routes for delete
 
 router.delete('/deleteStop', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(deleteStop,[stop_ID] ,function(err, result) {
+        client.query(deleteStop,[1] ,function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
+             { console.error(err); response.send("Error " + err); }
             else
             res.json(result.rows);
             console.log(result.rows)
@@ -392,6 +386,33 @@ router.delete('/deleteMessage', function(req, res, next) {
 
 
 
+
+///////////////////////////////////////testing route////////////////////////////////////
+
+router.get('/getAdmin', function(req, res, next) {
+    console.log(req.body)
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(getAdmin,[1], function(err, result) {
+            console.log("try to get administrator")
+            
+            if (err)
+            { console.error(err); response.send("Error " + err); }
+            else
+            res.json(result.rows);
+            console.log(result.rows)
+            done();
+        });
+    });
+ });
+
+
+
+
+
+
+
+
+
 var user={
     username:"y",
     password:"z"
@@ -400,6 +421,8 @@ var user={
 router.get("/test",function(req,res){
     console.log(user)
     res.json(user);
-})
+});
 
-module.exports=router;
+
+
+module.exports=router; 
