@@ -1,16 +1,16 @@
 var express = require('express');
+var cors = require('cors')
 var app = express();
 var bodyParser= require("body-parser");
 
 app.set('port', (process.env.PORT || 5000));
-
+app.use(cors())
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}))
 // views is directory for all template files
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
-
 
 app.get('/', function(request, response) {
   response.render('pages/index');
