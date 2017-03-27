@@ -85,6 +85,7 @@ router.put('/changeDriverRoute', function(req, res, next) {
 
             if (err)
              { console.error(err); res.send("Error" + err); }
+            
             else{
                 client.query(getDriverInfo,[req.body.driver_id] ,function(err, result) {
 
@@ -177,8 +178,6 @@ router.put('/updateBusLocation', function(req, res, next) {
         });
     });
 });
-
-
 
 
 

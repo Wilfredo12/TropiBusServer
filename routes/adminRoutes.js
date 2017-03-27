@@ -47,39 +47,40 @@ pg.defaults.ssl=true;
 
 //Routes for gets
 var getAllRoutes = 'SELECT * FROM Route'
-var getRoute = 'SELECT * FROM Route WHERE route_ID=$1'
+var getRoute = 'SELECT * FROM Route WHERE route_id=$1'
 var getAllStops = 'SELECT * FROM Stop' 
 var getNearestStop 
-var getStopsFromRoute = 'SELECT * FROM Stop WHERE route_ID=$1'
-var getBusLocation = 'SELECT bus_latitude, bus_longitude FROM Bus NATURAL JOIN GPS'
+var getStopsFromRoute = 'SELECT * FROM Stop WHERE route_id=$1'
+var getBusLocation = 'SELECT bus_latitude, bus_longitude FROM Bus NATURAL JOIN GPS WHERE bus_id = $1' 
 var getMessages = 'SELECT * FROM Message'
 var getBuses = 'SELECT * FROM Bus'
+var getAllDrivers = 'SELECT * FROM driver'
 
 
-var getAdmin = 'SELECT * FROM administrator WHERE admin_ID=$1'
+var getAdmin = 'SELECT * FROM administrator WHERE admin_id=$1'
 
 //Routes for Update
-var updateStop = 'UPDATE Stop SET stop_name=$1, stop_description=$2 WHERE stop_ID=$3'
-var updateRoute = 'UPDATE Route SET route_name=$1, route_description=$2 WHERE route_ID=$3'
-var updateBusAdmin = 'UPDATE Bus SET bus_name=$1, driver_ID=$2 WHERE bus_ID=$3'
-var updateDriver = 'UPDATE Driver SET first_name=$1, last_name=$2 WHERE driver_ID=$3'
-var updateMessage = 'UPDATE Message SET text=$1 WHERE message_ID=$2' 
+var updateStop = 'UPDATE Stop SET stop_name=$1, stop_description=$2 WHERE stop_id=$3'
+var updateRoute = 'UPDATE Route SET route_name=$1, route_description=$2 WHERE route_id=$3'
+var updateBusAdmin = 'UPDATE Bus SET bus_name=$1, driver_id=$2 WHERE bus_id=$3'
+var updateDriver = 'UPDATE Driver SET driver_firstname=$1, driver_lastname=$2 WHERE driver_id=$3'
+var updateMessage = 'UPDATE Message SET text=$1 WHERE message_id=$2' 
 
 //Routes for Add
 //var addStop = 'INSERT INTO Stop(stop_title, stop_description, stop_latitude, stop_longitude) VALUES (?,?,?,?)'
 var addMessage = 'INSERT INTO Message(text, message_date_added) VALUES ($1,$2)'
 
 //Routes for delete
-var deleteStop = 'DELETE FROM Stop WHERE stop_ID=$1'
-var deleteBus = 'DELETE FROM Bus WHERE bus_ID=$1'
-var deleteMessage = 'DELETE FROM Message WHERE message_ID=$1'
+var deleteStop = 'DELETE FROM Stop WHERE stop_id=$1'
+var deleteBus = 'DELETE FROM Bus WHERE bus_id=$1'
+var deleteMessage = 'DELETE FROM Message WHERE message_id=$1'
 
 //Routes for create
-var createDriver = 'INSERT INTO Driver(diver_ID, driver_first_name, driver_last_name, driver_user_name, driver_password, driver-status) VALUES ($1,$2,$3,$4,$5,$6)'
-var createBus = 'INSERT INTO bus(bus_name, driver_ID, route_ID, gps_ID) VALUES ($1,$2,$3,$4)'
-var createRoute = 'INSERT INTO route(route_ID, route_name, route_description) VALUES ($1,$2,$3)'
+var createDriver = 'INSERT INTO driver(driver_id, driver_firstname, driver_lastname, driver_username, driver_password, driver_status, bus_id) VALUES ($1,$2,$3,$4,$5,$6,$7)'
+var createBus = 'INSERT INTO bus(bus_name, driver_id, route_id, gps_id) VALUES ($1,$2,$3,$4)'
+var createRoute = 'INSERT INTO route(route_id, route_name, route_description) VALUES ($1,$2,$3)'
 
-var createStop = 'INSERT INTO Stop(stop_ID,stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4,$5)'
+var createStop = 'INSERT INTO Stop(stop_id,stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4,$5)'
 
 //var getAdmin = 'SELECT * FROM administrator WHERE admin_id=$1'
 
@@ -91,11 +92,12 @@ router.get('/getAllRoutes', function(req, res, next) {
         client.query(getAllRoutes, function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
+             { console.error(err); response.send("Error ekc " + err); }
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
@@ -103,14 +105,15 @@ router.get('/getAllRoutes', function(req, res, next) {
 router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getRoute, [req.body.route_ID], function(err, result) {
+        client.query(getRoute, [req.bodyid], function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
@@ -133,14 +136,15 @@ router.get('/getAllStops', function(req, res, next) {
 router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getStopsFromRoute,[req.body.route_ID], function(err, result) {
+        client.query(getStopsFromRoute,[req.body.route_id], function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+        }
         });
     });
 });
@@ -148,14 +152,15 @@ router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
 router.get('/getBusLocation', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getBusLocation, function(err, result) {
+        client.query(getBusLocation, [req.body.driver_id],function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
@@ -167,10 +172,11 @@ router.get('/getMessages', function(req, res, next) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
@@ -182,10 +188,11 @@ router.get('/getBuses', function(req, res, next) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
@@ -194,16 +201,28 @@ router.get('/getBuses', function(req, res, next) {
 //Routes for Update
 
 router.put('/updateStop', function(req, res, next) {
-    console.log(req.body)
+    console.log("Enter to update Stop",req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateStop,[res.body.stop_name, res.body.stop_description, stop_ID] ,function(err, result) {
 
+        //Update Stop
+        client.query(updateStop,[req.body.stop_name, req.body.stop_description, req.body.stop_id] ,function(err, result) {
             if (err)
              { console.error(err); response.send("Error" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
+
+            else{
+                client.query(getAllStops, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+
+            });
             done();
+            }
         });
     });
 });
@@ -211,13 +230,24 @@ router.put('/updateStop', function(req, res, next) {
 router.put('/updateRoute', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateRoute,[res.body.route_name, res.body.route_description, route_ID] ,function(err, result) {
+        client.query(updateRoute,[req.body.route_name, req.body.route_description,req.body.route_id] ,function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
+           
+            else{
+
+                client.query(getAllRoutes, function(err, result){
+
+                    if(err)
+                    { console.error(err); res.send("Error" + err); } 
+                    else
+                    res.jason(result.rows[0]);
+                    done();
+                });
+                done();
+                }
             res.json(result.rows);
-            console.log(result.rows)
             done();
         });
     });
@@ -226,14 +256,24 @@ router.put('/updateRoute', function(req, res, next) {
 router.put('/updateBusAdmin', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateBusAdmin,[res.body.bus_name, res.body.bus_ID, driver_ID] ,function(err, result) {
+        client.query(updateBusAdmin,[res.body.bus_name, res.body.bus_id, req.body.river_id] ,function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getBuses, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+
+            });
             done();
+            }
         });
     });
 });
@@ -241,14 +281,24 @@ router.put('/updateBusAdmin', function(req, res, next) {
 router.put('/updateDriver', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateDriver,[res.body.first_name, res.body.last_name, driver_ID] ,function(err, result) {
+        client.query(updateDriver,[req.body.driver_firstname, req.body.last_name, req.body.driver_id] ,function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
+             { console.error(err); res.send("Error " + err); }
+            else{
+                client.query(getAllDrivers, function(err, result){
+                
+                if(err)
+                { console.error(err); res.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+
+            });
             done();
+            }
         });
     });
 });
@@ -256,14 +306,23 @@ router.put('/updateDriver', function(req, res, next) {
 router.put('/updateMessage', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateMessage,[res.body.mesagge_text, message_ID] ,function(err, result) {
+        client.query(updateMessage,[rereq.body.mesagge_text, req.body.message_id] ,function(err, result) {
 
-            if (err)
-             { console.error(err); response.send("Error" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getMessages, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+            });
             done();
+            }
         });
     });
 });
@@ -273,19 +332,26 @@ router.put('/updateMessage', function(req, res, next) {
 //Routes for Add
 
 router.post('/createStop', function(req, res, next) {
-    console.log('holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(createStop,[0,'Parada','prueba',0,0] ,function(err, result) {
-            //req.body.stop_ID, req.body.stop_description, req.body.stop_latitude, req.body.stop_longitude
-            console.log('holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        client.query(createStop,[req.body.stop_id,stop_name ,req.body.stop_description, req.body.stop_latitude, req.body.stop_longitude] ,function(err, result) {
+            
+            
             if (err)
-             { console.error(err); response.send("Error" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
-            Console.log("no sale")
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllStops, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+            });
             done();
+            }
         });
     });
 });
@@ -293,14 +359,23 @@ router.post('/createStop', function(req, res, next) {
 router.post('/addMessage', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(addMessage,[res.body.mesagge_text, res.body.message_date_added] ,function(err, result) {
+        client.query(addMessage,[req.body.mesagge_text, req.body.message_date_added] ,function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getMessages, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+            });
             done();
+            }
         });
     });
 });
@@ -308,14 +383,23 @@ router.post('/addMessage', function(req, res, next) {
 router.post('/createDriver', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(createDriver,[res.body.driver_ID,res.body.driver_first_name, res.body.driver_last_name,res.body.driver_first_name,res.body.driver_last_name,res.body.driver_status] ,function(err, result) {
+        client.query(createDriver,[req.body.driver_id,req.body.driver_firstname, req.body.driver_lastname,req.body.driver_username,req.body.driver_password,req.body.driver_status, req.body.bus_id] ,function(err, result) {
 
-            if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllDrivers, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+            });
             done();
+            }
         });
     });
 });
@@ -323,14 +407,23 @@ router.post('/createDriver', function(req, res, next) {
 router.post('/createBus', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(createBus,[res.body.bus_name, res.body.driver_ID, res.body.route_ID, res.body.gps_ID] ,function(err, result) {
+        client.query(createBus,[req.body.bus_name, req.body.driver_id, req.body.route_id, req.body.gps_id] ,function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getBuses, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+            });
             done();
+            }
         });
     });
 });
@@ -341,69 +434,97 @@ router.post('/createBus', function(req, res, next) {
 router.delete('/deleteStop', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(deleteStop,[1] ,function(err, result) {
+        client.query(deleteStop,[req.body.stop_id] ,function(err, result) {
 
-            if (err)
+             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
+            else{
+                client.query(getAllStops, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+            });
             done();
+            }
         });
     });
 });
+
 
 router.delete('/deleteBus', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(deleteBus,[bus_ID] ,function(err, result) {
+        client.query(deleteBus,[res.bod.bus_id] ,function(err, result) {
 
-            if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
+             if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getBuses, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+            });
             done();
+            }
         });
     });
 });
+
 
 
 router.delete('/deleteMessage', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(deleteMessage,[message_ID] ,function(err, result) {
+        client.query(deleteMessage,[re.body.message_id] ,function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getMessages, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows[0]);
+                    done();
+                 }
+            });
             done();
+            }
         });
     });
 });
-
 
 
 
 ///////////////////////////////////////testing route////////////////////////////////////
 
-router.get('/getAdmin', function(req, res, next) {
-    console.log(req.body)
-    pg.connect(database_URL, function(err, client, done) {
-        client.query(getAdmin,[1], function(err, result) {
-            console.log("try to get administrator")
+// router.get('/getAdmin', function(req, res, next) {
+//     console.log(req.body)
+//     pg.connect(database_URL, function(err, client, done) {
+//         client.query(getAdmin,[1], function(err, result) {
+//             console.log("try to get administrator")
             
-            if (err)
-            { console.error(err); response.send("Error " + err); }
-            else
-            res.json(result.rows);
-            console.log(result.rows)
-            done();
-        });
-    });
- });
+//             if (err)
+//             { console.error(err); response.send("Error " + err); }
+//             else
+//             res.json(result.rows);
+//             console.log(result.rows)
+//             done();
+//         });
+//     });
+//  });
 
 
 
@@ -413,16 +534,15 @@ router.get('/getAdmin', function(req, res, next) {
 
 
 
-var user={
-    username:"y",
-    password:"z"
-}
+// var user={
+//     username:"y",
+//     password:"z"
+// }
 
-router.get("/test",function(req,res){
-    console.log(user)
-    res.json(user);
-});
+// router.get("/test",function(req,res){
+//     console.log(user)
+//     res.json(user);
+// });
 
+module.exports=router;
 
-
-module.exports=router; 
