@@ -23,10 +23,10 @@ pg.defaults.ssl=true;
 
 //Routes queries declaration 
 var getAllRoutes = 'SELECT * FROM Route'
-var getRoute = 'SELECT * FROM Route NATURAL JOIN Path WHERE route_ID=$1'
+var getRoute = 'SELECT * FROM Route NATURAL JOIN Path WHERE route_id=$1'
 var getAllStops = 'SELECT * FROM Stop' 
 var getNearestStop 
-var getStopsFromRoute = 'SELECT * FROM Stop WHERE route_ID=$1'
+var getStopsFromRoute = 'SELECT * FROM Stop WHERE route_id=$1'
 var getBusLocation = 'SELECT bus_latitude, bus_longitude FROM Bus NATURAL JOIN GPS'
 var getMessages = 'SELECT * FROM Message'
 var getBuses = 'SELECT * FROM Bus'
@@ -38,11 +38,12 @@ router.get('/getAllRoutes', function(req, res, next) {
         client.query(getAllRoutes, function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
-            else
+             { console.error(err); response.send("Error " + err); }
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
@@ -50,14 +51,15 @@ router.get('/getAllRoutes', function(req, res, next) {
 router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getRoute, [req.body.route_ID], function(err, result) {
+        client.query(getRoute, [req.body.route_id], function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
@@ -69,10 +71,11 @@ router.get('/getAllStops', function(req, res, next) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
@@ -84,10 +87,11 @@ router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
@@ -99,13 +103,15 @@ router.get('/getBusLocation', function(req, res, next) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
+//maaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaalllllllllll
 
 router.get('/getMessages', function(req, res, next) {
     console.log(req.body)
@@ -114,10 +120,11 @@ router.get('/getMessages', function(req, res, next) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });
@@ -129,10 +136,11 @@ router.get('/getBuses', function(req, res, next) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
-            else
+            else{
             res.json(result.rows);
             console.log(result.rows)
             done();
+            }
         });
     });
 });

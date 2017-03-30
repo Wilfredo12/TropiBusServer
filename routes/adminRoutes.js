@@ -46,11 +46,11 @@ const database_URL=  'postgres://wymxggcwikpwav:203bccfd54e249de1659cdcb1d99cac0
 pg.defaults.ssl=true;
 
 //Routes for gets
-var getAllRoutes = 'SELECT * FROM Route'
-var getRoute = 'SELECT * FROM Route WHERE route_id=$1'
+var getAllRoutes = 'SELECT * FROM Route NATURAL JOIN routepath'
+var getRoute = 'SELECT * FROM route NATURAL JOIN routepath WHERE route_id = $1'
 var getAllStops = 'SELECT * FROM Stop' 
 var getNearestStop 
-var getStopsFromRoute = 'SELECT * FROM Stop WHERE route_id=$1'
+var getStopsFromRoute = 'SELECT * FROM stop WHERE route_id=$1'
 var getBusLocation = 'SELECT bus_latitude, bus_longitude FROM Bus NATURAL JOIN GPS WHERE bus_id = $1' 
 var getMessages = 'SELECT * FROM Message'
 var getBuses = 'SELECT * FROM Bus'
@@ -103,15 +103,20 @@ router.get('/getAllRoutes', function(req, res, next) {
 });
 
 router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
-    console.log(req.body)
+    console.log('Route ID' + req.body)
+    
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getRoute, [req.bodyid], function(err, result) {
+        client.query(getRoute, [req.body.route_id], function(err, result) {
+
+
+            console.log('ENTRE A GET ROUTE')
 
             if (err)
              { console.error(err); response.send("Error " + err); }
             else{
             res.json(result.rows);
             console.log(result.rows)
+        
             done();
             }
         });
@@ -133,8 +138,11 @@ router.get('/getAllStops', function(req, res, next) {
     });
 });
 
+
+/////////////////////////////////////////////
+
 router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
-    console.log(req.body)
+    console.log('Route ID', req.body)
     pg.connect(database_URL, function(err, client, done) {
         client.query(getStopsFromRoute,[req.body.route_id], function(err, result) {
 
