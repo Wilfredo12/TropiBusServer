@@ -98,6 +98,8 @@ var assignGPStoBus = 'UPDATE bus SET gps_id=$1 WHERE bus_id=$2'
 var changeDriverStatus = 'UPDATE driver driver_status=$1 WHERE driver_id=1'
 var changeBusStatus = 'UPDATE bus SET bus_status=$1 WHERE bus_id=$2'
 
+var changeStop
+
 
 //Routes for gets 
 router.get('/getAllRoutes', function(req, res, next) {
