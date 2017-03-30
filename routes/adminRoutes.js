@@ -49,18 +49,21 @@ pg.defaults.ssl=true;
 var getAllRoutes = 'SELECT * FROM Route NATURAL JOIN routepath'
 var getRoute = 'SELECT * FROM route NATURAL JOIN routepath WHERE route_id = $1'
 var getAllStops = 'SELECT * FROM Stop' 
-var getNearestStop 
+//---------------------------- 
 var getStopsFromRoute = 'SELECT * FROM stop WHERE route_id=$1'
-var getBusLocation = 'SELECT bus_latitude, bus_longitude FROM Bus NATURAL JOIN GPS WHERE bus_id = $1' 
-var getMessages = 'SELECT * FROM Message'
-var getBuses = 'SELECT * FROM Bus'
+//---------------------------- 
+
+
+var getBusLocation = 'SELECT bus_latitude, bus_longitude FROM Bus NATURAL JOIN GPS WHERE bus_id = $1' //verificar 
+var getAllMessages = 'SELECT * FROM Message'
+var getAllBuses = 'SELECT * FROM Bus'
 var getAllDrivers = 'SELECT * FROM driver'
 
 
 var getAdmin = 'SELECT * FROM administrator WHERE admin_id=$1'
 
 //Routes for Update
-var updateStop = 'UPDATE Stop SET stop_name=$1, stop_description=$2 WHERE stop_id=$3'
+var updateStop = 'UPDATE stop SET stop_name=$1, stop_description=$2 WHERE stop_id=$3'
 var updateRoute = 'UPDATE Route SET route_name=$1, route_description=$2 WHERE route_id=$3'
 var updateBusAdmin = 'UPDATE Bus SET bus_name=$1, driver_id=$2 WHERE bus_id=$3'
 var updateDriver = 'UPDATE Driver SET driver_firstname=$1, driver_lastname=$2 WHERE driver_id=$3'
@@ -68,7 +71,7 @@ var updateMessage = 'UPDATE Message SET text=$1 WHERE message_id=$2'
 
 //Routes for Add
 //var addStop = 'INSERT INTO Stop(stop_title, stop_description, stop_latitude, stop_longitude) VALUES (?,?,?,?)'
-var addMessage = 'INSERT INTO Message(text, message_date_added) VALUES ($1,$2)'
+var addMessage = 'INSERT INTO Message(text, message_date) VALUES ($1,$2)'
 
 //Routes for delete
 var deleteStop = 'DELETE FROM Stop WHERE stop_id=$1'
@@ -77,12 +80,23 @@ var deleteMessage = 'DELETE FROM Message WHERE message_id=$1'
 
 //Routes for create
 var createDriver = 'INSERT INTO driver(driver_id, driver_firstname, driver_lastname, driver_username, driver_password, driver_status, bus_id) VALUES ($1,$2,$3,$4,$5,$6,$7)'
-var createBus = 'INSERT INTO bus(bus_name, driver_id, route_id, gps_id) VALUES ($1,$2,$3,$4)'
+var createBus = 'INSERT INTO bus(bus_id, bus_name, driver_id, route_id, gps_id) VALUES ($1,$2,$3,$4,$5)'
 var createRoute = 'INSERT INTO route(route_id, route_name, route_description) VALUES ($1,$2,$3)'
 
 var createStop = 'INSERT INTO Stop(stop_id,stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4,$5)'
 
 //var getAdmin = 'SELECT * FROM administrator WHERE admin_id=$1'
+
+var adminLogin = ''
+var adminLogout = ''
+
+//assgign querties 
+var assignBustoDriver = 'UPDATE driver SET bus_id=$1 WHERE driver_id=$2'
+var assignRoutetoBus = 'UPDATE bus SET route_id=$1 WHERE bus_id=$2'
+var assignGPStoBus = 'UPDATE bus SET gps_id=$1 WHERE bus_id=$2'
+
+var changeDriverStatus = 'UPDATE driver driver_status=$1 WHERE driver_id=1'
+var changeBusStatus = 'UPDATE bus SET bus_status=$1 WHERE bus_id=$2'
 
 
 //Routes for gets 

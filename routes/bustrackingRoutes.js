@@ -24,7 +24,7 @@ pg.defaults.ssl=true;
 
 //Routes for get
 var getDriverInfo = 'SELECT driver_id, driver_firstname, driver_lastname, bus_id, bus_name,bus_status, route_id, route_name FROM bus NATURAL JOIN driver NATURAL JOIN route WHERE driver_id = $1' 
-var getRoutes = 'SELECT route_id,route_name FROM route'
+var getRoutes = 'SELECT * FROM route' //SELECT route_id,route_name FROM route
 var getDriverBusID = 'SELECT bus_id FROM driver WHERE driver_id = $1'
 var getGPSid = 'SELECT gps_id FROM bus WHERE bus_id = $1'
 
@@ -53,9 +53,10 @@ router.post('/getDriverInfo', function(req, res, next) { // Parameter: Route ID
 
             if (err)
              { console.error(err); res.send("Error " + err); }
-            else
+            else{
             res.json(result.rows[0]);
             done();
+            }
         });
     });
 });
@@ -67,10 +68,12 @@ router.get('/getRoutes', function(req, res, next) { // Parameter: Route ID
         client.query(getRoutes, function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error " + err); }
-            else
+             { console.error(err); res.send("Error " + err); }
+            else{
             res.json(result.rows);
+            console.log(result.rows)
             done();
+            }
         });
     });
 });

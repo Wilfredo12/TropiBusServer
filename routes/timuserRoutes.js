@@ -38,7 +38,7 @@ router.get('/getAllRoutes', function(req, res, next) {
         client.query(getAllRoutes, function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error " + err); }
+             { console.error(err); res.send("Error " + err); }
             else{
             res.json(result.rows);
             console.log(result.rows)
