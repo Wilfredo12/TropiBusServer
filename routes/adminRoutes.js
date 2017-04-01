@@ -60,15 +60,15 @@ var getAllDrivers = 'SELECT * FROM driver' //ok
 
 
 //Routes for Update
-var updateStop = 'UPDATE stop SET stop_name=$1, stop_description=$2 WHERE stop_id=$3'
-var updateRoute = 'UPDATE Route SET route_name=$1, route_description=$2 WHERE route_id=$3'
-var updateBusAdmin = 'UPDATE Bus SET bus_name=$1, driver_id=$2 WHERE bus_id=$3'
-var updateDriver = 'UPDATE Driver SET driver_firstname=$1, driver_lastname=$2 WHERE driver_id=$3'
-var updateMessage = 'UPDATE Message SET text=$1 WHERE message_id=$2' 
+var updateStop = 'UPDATE stop SET stop_name=$1, stop_description=$2 WHERE stop_id=$3'//ok
+var updateRoute = 'UPDATE Route SET route_name=$1, route_description=$2 WHERE route_id=$3'//ok
+var updateBus = 'UPDATE Bus SET bus_name=$1,  WHERE bus_id=$3' //pendiente
+var updateDriver = 'UPDATE Driver SET driver_firstname=$1, driver_lastname=$2 WHERE driver_id=$3'//ok
+var updateMessage = 'UPDATE message SET message_text=$1 WHERE message_id=$2' 
 
 //Routes for Add
 //var addStop = 'INSERT INTO Stop(stop_title, stop_description, stop_latitude, stop_longitude) VALUES (?,?,?,?)'
-var addMessage = 'INSERT INTO Message(text, message_date) VALUES ($1,$2)'
+
 
 //Routes for delete
 var deleteStop = 'DELETE FROM Stop WHERE stop_id=$1'
@@ -80,6 +80,7 @@ var createDriver = 'INSERT INTO driver(driver_id, driver_firstname, driver_lastn
 var createBus = 'INSERT INTO bus(bus_id, bus_name, driver_id, route_id, gps_id) VALUES ($1,$2,$3,$4,$5)'
 var createRoute = 'INSERT INTO route(route_id, route_name, route_description) VALUES ($1,$2,$3)'
 var createStop = 'INSERT INTO Stop(stop_id,stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4,$5)'
+var addMessage = 'INSERT INTO Message(text, message_date) VALUES ($1,$2)'
 
 
 var adminLogin = ''
@@ -162,11 +163,10 @@ router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
             res.json(result.rows);
             console.log(result.rows)
             done();
-        }
+            }
         });
     });
 });
-////////////////////////////////////////////////
 
 router.get('/getBusLocation', function(req, res, next) {
     console.log('bus ID', req.query.bus_id)
@@ -232,16 +232,18 @@ router.get('/getAllDrivers', function(req, res, next) {
     });
 });
 
-//////////////////////////Todos los routes de get sobre este punto funcionan correctamente /////////////////////////
+
 
 //Routes for Update
 
 router.put('/updateStop', function(req, res, next) {
-    console.log("Enter to update Stop",req.body)
+
+    console.log("Enter to update Stop ",req.query.stop_id)
+
     pg.connect(database_URL, function(err, client, done) {
 
         //Update Stop
-        client.query(updateStop,[req.body.stop_name, req.body.stop_description, req.body.stop_id] ,function(err, result) {
+        client.query(updateStop,[req.query.stop_name, req.query.stop_description, req.query.stop_id] ,function(err, result) {
             if (err)
              { console.error(err); response.send("Error" + err); }
 
@@ -252,7 +254,7 @@ router.put('/updateStop', function(req, res, next) {
                 { console.error(err); response.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
 
@@ -264,35 +266,42 @@ router.put('/updateStop', function(req, res, next) {
 });
 
 router.put('/updateRoute', function(req, res, next) {
-    console.log(req.body)
+    console.log('Route ID ', req.query.route_id)
+    console.log('Route Description ', req.query.route_description)
+    console.log('Route Name ', req.query.route_name)
+
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateRoute,[req.body.route_name, req.body.route_description,req.body.route_id] ,function(err, result) {
+        client.query(updateRoute,[req.query.route_name, req.query.route_description, req.query.route_id] ,function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc sdskdvskvdskvsvdsk" + err); }
+             { console.error(err); response.send("Error " + err); }
            
             else{
-
                 client.query(getAllRoutes, function(err, result){
 
                     if(err)
-                    { console.error(err); res.send("Error" + err); } 
-                    else
-                    res.jason(result.rows[0]);
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
                     done();
-                });
-                done();
-                }
-            res.json(result.rows);
+                 }
+            });
             done();
+            }
         });
     });
 });
 
 router.put('/updateBusAdmin', function(req, res, next) {
-    console.log(req.body)
+
+    console.log('Bus Name ', req.query.bus_name)
+    console.log('Bus bus ID ', req.query.bus_name)
+    console.log('Driver Id ', req.query.bus_name)
+
+
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateBusAdmin,[res.body.bus_name, res.body.bus_id, req.body.river_id] ,function(err, result) {
+        client.query(updateBusAdmin,[res.query.bus_name, res.query.bus_id, req.query.driver_id] ,function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
@@ -303,10 +312,9 @@ router.put('/updateBusAdmin', function(req, res, next) {
                 { console.error(err); response.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
-
             });
             done();
             }
@@ -340,20 +348,20 @@ router.put('/updateDriver', function(req, res, next) {
 });
 
 router.put('/updateMessage', function(req, res, next) {
-    console.log(req.body)
+    console.log('Mensaje'+req.query.mesagge_text, 'ID del mensaje '+ req.query.mesagge_id)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateMessage,[rereq.body.mesagge_text, req.body.message_id] ,function(err, result) {
+        client.query(updateMessage,[req.query.message_text, req.query.message_id] ,function(err, result) {
 
            if (err)
              { console.error(err); response.send("Error " + err); }
             else{
-                client.query(getMessages, function(err, result){
+                client.query(getAllMessages, function(err, result){
                 
                 if(err)
                 { console.error(err); response.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
             });
@@ -415,10 +423,13 @@ router.post('/addMessage', function(req, res, next) {
     });
 });
 
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 router.post('/createDriver', function(req, res, next) {
-    console.log(req.body)
+    console.log('Driver ID ', req.query.driver_id)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(createDriver,[req.body.driver_id,req.body.driver_firstname, req.body.driver_lastname,req.body.driver_username,req.body.driver_password,req.body.driver_status, req.body.bus_id] ,function(err, result) {
+        client.query(createDriver,[req.query.driver_id,req.query.driver_firstname, req.query.driver_lastname,req.query.driver_username,req.query.driver_password,req.query.driver_status, req.query.bus_id] ,function(err, result) {
 
            if (err)
              { console.error(err); response.send("Error " + err); }
@@ -429,7 +440,7 @@ router.post('/createDriver', function(req, res, next) {
                 { console.error(err); response.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
             });
@@ -442,7 +453,7 @@ router.post('/createDriver', function(req, res, next) {
 router.post('/createBus', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(createBus,[req.body.bus_name, req.body.driver_id, req.body.route_id, req.body.gps_id] ,function(err, result) {
+        client.query(createBus,[req.query.bus_name, req.query.driver_id, req.query.route_id, req.query.gps_id] ,function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
@@ -469,7 +480,7 @@ router.post('/createBus', function(req, res, next) {
 router.delete('/deleteStop', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(deleteStop,[req.body.stop_id] ,function(err, result) {
+        client.query(deleteStop,[req.query.stop_id] ,function(err, result) {
 
              if (err)
              { console.error(err); response.send("Error " + err); }
@@ -494,7 +505,7 @@ router.delete('/deleteStop', function(req, res, next) {
 router.delete('/deleteBus', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(deleteBus,[res.bod.bus_id] ,function(err, result) {
+        client.query(deleteBus,[res.querty.bus_id] ,function(err, result) {
 
              if (err)
              { console.error(err); response.send("Error " + err); }
@@ -520,7 +531,7 @@ router.delete('/deleteBus', function(req, res, next) {
 router.delete('/deleteMessage', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(deleteMessage,[re.body.message_id] ,function(err, result) {
+        client.query(deleteMessage,[req.query.message_id] ,function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
