@@ -22,14 +22,13 @@ const database_URL=  'postgres://wymxggcwikpwav:203bccfd54e249de1659cdcb1d99cac0
 pg.defaults.ssl=true;
 
 //Routes queries declaration 
-var getAllRoutes = 'SELECT * FROM Route'
-var getRoute = 'SELECT * FROM Route NATURAL JOIN Path WHERE route_id=$1'
-var getAllStops = 'SELECT * FROM Stop' 
-var getNearestStop 
-var getStopsFromRoute = 'SELECT * FROM Stop WHERE route_id=$1'
-var getBusLocation = 'SELECT bus_latitude, bus_longitude FROM Bus NATURAL JOIN GPS'
-var getMessages = 'SELECT * FROM Message'
-var getBuses = 'SELECT * FROM Bus'
+var getAllRoutes = 'SELECT * FROM route'
+var getRoute = 'SELECT * FROM route NATURAL JOIN routepath WHERE route_id=$1'
+var getAllStops = 'SELECT * FROM stop'  
+var getStopsFromRoute = 'SELECT * FROM stop WHERE route_id=$1'
+var getBusLocation = 'SELECT bus_latitude, bus_longitude FROM Bus NATURAL JOIN GPS WHERE bus_id=$1'
+var getMessages = 'SELECT * FROM message'
+var getBuses = 'SELECT * FROM bus'
 
 
 router.get('/getAllRoutes', function(req, res, next) {

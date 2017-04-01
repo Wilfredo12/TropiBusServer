@@ -46,21 +46,18 @@ const database_URL=  'postgres://wymxggcwikpwav:203bccfd54e249de1659cdcb1d99cac0
 pg.defaults.ssl=true;
 
 //Routes for gets
-var getAllRoutes = 'SELECT * FROM Route NATURAL JOIN routepath'
-var getRoute = 'SELECT * FROM route NATURAL JOIN routepath WHERE route_id = $1'
-var getAllStops = 'SELECT * FROM Stop' 
+var getAllRoutes = 'SELECT * FROM Route NATURAL JOIN routepath' //ok 
+var getRoute = 'SELECT * FROM route NATURAL JOIN routepath WHERE route_id = $1' //ok
+var getAllStops = 'SELECT * FROM Stop' //ok
 //---------------------------- 
-var getStopsFromRoute = 'SELECT * FROM stop WHERE route_id=$1'
+var getStopsFromRoute = 'SELECT * FROM stop_routepath WHERE route_id=$1' //verify n-n realtion 
 //---------------------------- 
 
+var getBusLocation = 'SELECT gps_latitude, gps_longitude FROM bus NATURAL JOIN GPS WHERE bus_id = $1' //ok
+var getAllMessages = 'SELECT * FROM Message' //ok
+var getAllBuses = 'SELECT * FROM Bus'//ok
+var getAllDrivers = 'SELECT * FROM driver' //ok
 
-var getBusLocation = 'SELECT bus_latitude, bus_longitude FROM Bus NATURAL JOIN GPS WHERE bus_id = $1' //verificar 
-var getAllMessages = 'SELECT * FROM Message'
-var getAllBuses = 'SELECT * FROM Bus'
-var getAllDrivers = 'SELECT * FROM driver'
-
-
-var getAdmin = 'SELECT * FROM administrator WHERE admin_id=$1'
 
 //Routes for Update
 var updateStop = 'UPDATE stop SET stop_name=$1, stop_description=$2 WHERE stop_id=$3'
@@ -82,10 +79,8 @@ var deleteMessage = 'DELETE FROM Message WHERE message_id=$1'
 var createDriver = 'INSERT INTO driver(driver_id, driver_firstname, driver_lastname, driver_username, driver_password, driver_status, bus_id) VALUES ($1,$2,$3,$4,$5,$6,$7)'
 var createBus = 'INSERT INTO bus(bus_id, bus_name, driver_id, route_id, gps_id) VALUES ($1,$2,$3,$4,$5)'
 var createRoute = 'INSERT INTO route(route_id, route_name, route_description) VALUES ($1,$2,$3)'
-
 var createStop = 'INSERT INTO Stop(stop_id,stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4,$5)'
 
-//var getAdmin = 'SELECT * FROM administrator WHERE admin_id=$1'
 
 var adminLogin = ''
 var adminLogout = ''
@@ -94,11 +89,10 @@ var adminLogout = ''
 var assignBustoDriver = 'UPDATE driver SET bus_id=$1 WHERE driver_id=$2'
 var assignRoutetoBus = 'UPDATE bus SET route_id=$1 WHERE bus_id=$2'
 var assignGPStoBus = 'UPDATE bus SET gps_id=$1 WHERE bus_id=$2'
+var assgignRoutetoPath = 'UPDATE bus SET route_id= $1 WHERE path_id=$2'
 
 var changeDriverStatus = 'UPDATE driver driver_status=$1 WHERE driver_id=1'
 var changeBusStatus = 'UPDATE bus SET bus_status=$1 WHERE bus_id=$2'
-
-var changeStop
 
 
 //Routes for gets 
@@ -108,7 +102,7 @@ router.get('/getAllRoutes', function(req, res, next) {
         client.query(getAllRoutes, function(err, result) {
 
             if (err)
-             { console.error(err); response.send("Error ekc " + err); }
+             { console.error(err); response.send("Error " + err); }
             else{
             res.json(result.rows);
             console.log(result.rows)
@@ -123,7 +117,7 @@ router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
     
     pg.connect(database_URL, function(err, client, done) {
         client.query(getRoute, [req.body.route_id], function(err, result) {
-
+                              
 
             console.log('ENTRE A GET ROUTE')
 
@@ -172,11 +166,28 @@ router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
         });
     });
 });
+////////////////////////////////////////////////
 
 router.get('/getBusLocation', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getBusLocation, [req.body.driver_id],function(err, result) {
+        client.query(getBusLocation, [req.body.bus_id],function(err, result) {
+                                
+            if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+            res.json(result.rows);
+            console.log(result.rows)
+            done();
+            }
+        });
+    });
+});
+
+router.get('/getAllMessages', function(req, res, next) {
+    console.log(req.body)
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(getAllMessages, function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
@@ -189,10 +200,10 @@ router.get('/getBusLocation', function(req, res, next) {
     });
 });
 
-router.get('/getMessages', function(req, res, next) {
+router.get('/getAllBuses', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getMessages, function(err, result) {
+        client.query(getAllBuses, function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
@@ -205,10 +216,10 @@ router.get('/getMessages', function(req, res, next) {
     });
 });
 
-router.get('/getBuses', function(req, res, next) {
+router.get('/getAllDrivers', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getBuses, function(err, result) {
+        client.query(getAllDrivers, function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
@@ -529,33 +540,6 @@ router.delete('/deleteMessage', function(req, res, next) {
         });
     });
 });
-
-
-
-///////////////////////////////////////testing route////////////////////////////////////
-
-// router.get('/getAdmin', function(req, res, next) {
-//     console.log(req.body)
-//     pg.connect(database_URL, function(err, client, done) {
-//         client.query(getAdmin,[1], function(err, result) {
-//             console.log("try to get administrator")
-            
-//             if (err)
-//             { console.error(err); response.send("Error " + err); }
-//             else
-//             res.json(result.rows);
-//             console.log(result.rows)
-//             done();
-//         });
-//     });
-//  });
-
-
-
-
-
-
-
 
 
 // var user={
