@@ -150,6 +150,7 @@ router.get('/getAllStops', function(req, res, next) {
 
 
 /////////////////////////////////////////////
+//probar si la relacion n-n de la base de datos funciona correctamente 
 
 router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
     console.log('Route ID', req.body)
@@ -232,6 +233,7 @@ router.get('/getAllDrivers', function(req, res, next) {
     });
 });
 
+//////////////////////////Todos los routes de get sobre este punto funcionan correctamente /////////////////////////
 
 //Routes for Update
 
