@@ -61,11 +61,11 @@ router.get('/getAllRoutes', function(req, res, next) {
 
 //get route with specific route id from database and send the information back as response
 router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
-    console.log("entre a cojer info ruta especifica",req.body)
+    console.log("entre a cojer info ruta especifica",req.query.route_id)
     //connect to database
     pg.connect(database_URL, function(err, client, done) {
         //run query
-        client.query(getRoute, [req.body.route_id], function(err, result) {
+        client.query(getRoute, [req.query.route_id], function(err, result) {
 
             if (err)
              { console.error(err); res.send("Error " + err); }
@@ -99,11 +99,11 @@ router.get('/getAllStops', function(req, res, next) {
 
 //get all bus stops from specific route and send info back as response
 router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
-    console.log("cojer paradas de ruta especifica",req.body)
+    console.log("cojer paradas de ruta especifica",req.query.route_id)
     //conneting to database
     pg.connect(database_URL, function(err, client, done) {
         //running query
-        client.query(getStopsFromRoute,[req.body.route_id], function(err, result) {
+        client.query(getStopsFromRoute,[req.query.route_id], function(err, result) {
 
             if (err)
              { console.error(err); res.send("Error " + err); }
@@ -118,11 +118,11 @@ router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
 
 //getting bus location from specific route
 router.get('/getBusLocation', function(req, res, next) {
-    console.log("buscando localizacion de bus",req.body)
+    console.log("buscando localizacion de bus",req.query.route_id)
     //connecting to database
     pg.connect(database_URL, function(err, client, done) {
         //runnig query
-        client.query(getBusLocation, [req.body.route_id],function(err, result) {
+        client.query(getBusLocation, [req.query.route_id],function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }

@@ -47,7 +47,7 @@ pg.defaults.ssl=true;
 
 //Routes for gets
 var getAllRoutes = 'SELECT * FROM Route NATURAL JOIN routepath' //ok 
-var getRoute = 'SELECT * FROM route NATURAL JOIN routepath WHERE route_id = $1' //ok
+var getRoute = 'SELECT * FROM route NATURAL JOIN routepath WHERE route_id = $1' //okx2
 var getAllStops = 'SELECT * FROM Stop' //ok
 //---------------------------- 
 var getStopsFromRoute = 'SELECT * FROM stop_routepath WHERE route_id=$1' //verify n-n realtion 
@@ -96,7 +96,7 @@ var changeBusStatus = 'UPDATE bus SET bus_status=$1 WHERE bus_id=$2'
 
 
 //Routes for gets 
-router.get('/getAllRoutes', function(req, res, next) {
+router.get('/getAllRoute', function(req, res, next) {
     console.log(req.body)
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllRoutes, function(err, result) {
@@ -113,12 +113,11 @@ router.get('/getAllRoutes', function(req, res, next) {
 });
 
 router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
-    console.log('Route ID' + req.body)
+    console.log('Route ID ', req.query.route_id)
     
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getRoute, [req.body.route_id], function(err, result) {
+        client.query(getRoute, [req.query.route_id], function(err, result) {
                               
-
             console.log('ENTRE A GET ROUTE')
 
             if (err)
@@ -153,9 +152,9 @@ router.get('/getAllStops', function(req, res, next) {
 //probar si la relacion n-n de la base de datos funciona correctamente 
 
 router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
-    console.log('Route ID', req.body)
+    console.log('Route ID', req.query.route_id)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getStopsFromRoute,[req.body.route_id], function(err, result) {
+        client.query(getStopsFromRoute,[req.query.route_id], function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
@@ -170,9 +169,9 @@ router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
 ////////////////////////////////////////////////
 
 router.get('/getBusLocation', function(req, res, next) {
-    console.log(req.body)
+    console.log('bus ID', req.query.bus_id)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getBusLocation, [req.body.bus_id],function(err, result) {
+        client.query(getBusLocation, [req.query.bus_id],function(err, result) {
                                 
             if (err)
              { console.error(err); response.send("Error " + err); }
@@ -364,7 +363,6 @@ router.put('/updateMessage', function(req, res, next) {
     });
 });
 
-//Falta el de crear ruta
 
 //Routes for Add
 
