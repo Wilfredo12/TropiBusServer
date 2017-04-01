@@ -45,7 +45,7 @@ var logout = 'UPDATE driver SET driver_status = \'not logged\' WHERE driver_id =
 
 
 
-//Routes for get
+//get information from driver from database and send back to application
 router.post('/getDriverInfo', function(req, res, next) { // Parameter: Route ID
     console.log(" getting driver info",req.body)
     pg.connect(database_URL, function(err, client, done) {
@@ -61,7 +61,7 @@ router.post('/getDriverInfo', function(req, res, next) { // Parameter: Route ID
     });
 });
 
-
+//get routes names and ids from database and send back to application
 router.get('/getRoutes', function(req, res, next) { // Parameter: Route ID
     console.log("getting tim's routes ")
     pg.connect(database_URL, function(err, client, done) {
@@ -79,8 +79,7 @@ router.get('/getRoutes', function(req, res, next) { // Parameter: Route ID
 });
 
 
-//Routes for update
-
+//change driver route, updating on database and sending back driver info to application
 router.put('/changeDriverRoute', function(req, res, next) {
     console.log("entre a cambiar ruta de conductor",req.body)
     pg.connect(database_URL, function(err, client, done) {
@@ -104,21 +103,7 @@ router.put('/changeDriverRoute', function(req, res, next) {
     });
 });
 
-// router.put('/updateDriverBus', function(req, res, next) {
-//     console.log(req.body)
-//     pg.connect(database_URL, function(err, client, done) {
-//         client.query(updateDriverBus,[res.body.bus_id, res.body.driver_id] ,function(err, result) {
-
-//             if (err)
-//              { console.error(err); response.send("Error" + err); }
-//             else
-//             res.json(result.rows);
-//             console.log(result.rows)
-//             done();
-//         });
-//     });
-// });
-
+//updating bus status on database and then sending back driver info to application
 router.put('/updateBusStatus', function(req, res, next) {
     console.log("haciendo update al status del bus", req.body)
     pg.connect(database_URL, function(err, client, done) {
@@ -185,7 +170,8 @@ router.put('/updateBusLocation', function(req, res, next) {
 
 
 //Routes for login/logout
-
+//login driver on system, updatin driver status to "logged in" if credentials are correct
+//if credentials are incorrect send -1 back as a response
 router.post('/login', function(req, res, next) {
     console.log("entre al login",req.body)
     
@@ -222,7 +208,7 @@ router.post('/login', function(req, res, next) {
         });
     });
 });
-
+//loging out driver, updting driver status on database
 router.put('/logout', function(req, res, next) {
     console.log("login out",req.body)
     pg.connect(database_URL, function(err, client, done) {
