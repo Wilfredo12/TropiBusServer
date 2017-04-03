@@ -46,10 +46,10 @@ var logout = 'UPDATE driver SET driver_status = \'not logged\' WHERE driver_id =
 
 
 //get information from driver from database and send back to application
-router.post('/getDriverInfo', function(req, res, next) { // Parameter: Route ID
+router.get('/getDriverInfo', function(req, res, next) { // Parameter: Route ID
     console.log(" getting driver info",req.body)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(getDriverInfo, [req.body.driver_id], function(err, result) {
+        client.query(getDriverInfo, [req.query.driver_id], function(err, result) {
 
             if (err)
              { console.error(err); res.send("Error " + err); }
