@@ -38,7 +38,7 @@ var getStopsFromRoute = 'SELECT * FROM stop NATURAL JOIN route_stop WHERE route_
 //var getBusLocation = 'SELECT gps_latitude, gps_longitude FROM bus NATURAL JOIN gps NATURAL JOIN route WHERE route_id=$1'
 var getMessages = 'SELECT * FROM Message'
 
-
+var getRouteStatus='SELECT route_id, bus_status from route NATURAL JOIN bus WHERE bus_status="Active" OR bus_status="Changing Turn"'
 
 //get all routes from database and send them back as response
 router.get('/getAllRoutes', function(req, res, next) {
@@ -51,6 +51,41 @@ router.get('/getAllRoutes', function(req, res, next) {
             if (err)
              { console.error(err); res.send("Error " + err); }
             else{
+                //run query
+            // client.query(getRouteStatus, function(err, result1) {
+
+            //     if (err)
+            //     { console.error(err); res.send("Error " + err); }
+            //     else{
+            //     var results=result.rows;
+            //     var tempResults=result1.rows;
+            //     //if no buses are active set status of routes to inactive
+            //     if(tempResults.length==0){
+            //         for(var i=0;i<results.length;i++){
+            //             results.bus_status="Inactive"
+            //         }
+            //     }
+            //     //buses are active on some route
+            //     else{
+            //         for(var i=0;i<tempResults.length;i++){
+            //             var active=false;
+            //             for(var j=0;j<results.length;j++){
+            //                 if(results[j].route_id==tempResults[i].route_id){
+            //                     results[j].bus_status=tempResults[i].bus_status
+            //                     active=true;
+            //                     break;
+            //                 }
+            //             }
+            //              if(!active){
+            //                     results[i].bus_status="Inactive"
+            //                 }
+            //         }
+            //     }
+            //     //sending result back as json
+            //     res.json(results.rows);
+            //     done();
+            //     }
+            // });
             //sending result back as json
             res.json(result.rows);
             done();
