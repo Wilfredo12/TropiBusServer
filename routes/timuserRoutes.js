@@ -23,7 +23,7 @@ pg.defaults.ssl=true;
 
 //Routes queries declaration 
 
-var getAllRoutes = 'SELECT * FROM route'
+
 var getRoute = 'SELECT * FROM route NATURAL JOIN routepath WHERE route_id=$1'
 var getAllStops = 'SELECT * FROM stop'  
 var getStopsFromRoute = 'SELECT * FROM stop WHERE route_id=$1'
@@ -35,7 +35,7 @@ var getAllRoutes = 'SELECT * FROM route NATURAL JOIN routepath'
 var getRoute = 'SELECT * FROM route NATURAL JOIN routepath WHERE route_id=$1'
 var getAllStops = 'SELECT * FROM stop'  
 var getStopsFromRoute = 'SELECT * FROM stop NATURAL JOIN route_stop WHERE route_id=$1'
-var getBusLocation = 'SELECT gps_latitude, gps_longitude FROM bus NATURAL JOIN gps NATURAL JOIN route WHERE route_id=$1'
+//var getBusLocation = 'SELECT gps_latitude, gps_longitude FROM bus NATURAL JOIN gps NATURAL JOIN route WHERE route_id=$1'
 var getMessages = 'SELECT * FROM Message'
 
 

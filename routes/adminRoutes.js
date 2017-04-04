@@ -74,6 +74,8 @@ var updateMessage = 'UPDATE message SET message_text=$1 WHERE message_id=$2'
 var deleteStop = 'DELETE FROM Stop WHERE stop_id=$1'
 var deleteBus = 'DELETE FROM Bus WHERE bus_id=$1'
 var deleteMessage = 'DELETE FROM Message WHERE message_id=$1'
+var deleteDriver = 'DELETE FROM driver WHERE driver_id = $1'
+var deleteRoute = 'DELETE FROM route WHERE route_id = $1'
 
 //Routes for create
 var createDriver = 'INSERT INTO driver(driver_id, driver_firstname, driver_lastname, driver_username, driver_password, driver_status, bus_id) VALUES ($1,$2,$3,$4,$5,$6,$7)'
@@ -81,7 +83,6 @@ var createBus = 'INSERT INTO bus(bus_id, bus_name, driver_id, route_id, gps_id) 
 var createRoute = 'INSERT INTO route(route_id, route_name, route_description) VALUES ($1,$2,$3)'
 var createStop = 'INSERT INTO Stop(stop_id,stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4,$5)'
 var addMessage = 'INSERT INTO Message(text, message_date) VALUES ($1,$2)'
-
 
 var adminLogin = ''
 var adminLogout = ''
@@ -98,7 +99,7 @@ var changeBusStatus = 'UPDATE bus SET bus_status=$1 WHERE bus_id=$2'
 
 //Routes for gets 
 router.get('/getAllRoute', function(req, res, next) {
-    console.log(req.body)
+    console.log('Print all stored routes in JSON format')
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllRoutes, function(err, result) {
 
@@ -114,7 +115,9 @@ router.get('/getAllRoute', function(req, res, next) {
 });
 
 router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
-    console.log('Route ID ', req.query.route_id)
+
+    console.log('Print an specific route and path in JSON format')
+    console.log('Route ID: ', req.query.route_id)
     
     pg.connect(database_URL, function(err, client, done) {
         client.query(getRoute, [req.query.route_id], function(err, result) {
@@ -125,6 +128,7 @@ router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
              { console.error(err); response.send("Error " + err); }
             else{
             res.json(result.rows);
+            res.json('HOLAAAAAAAAAAAAAAAAAA');/////
             console.log(result.rows)
         
             done();
@@ -134,7 +138,7 @@ router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
 });
 
 router.get('/getAllStops', function(req, res, next) {
-    console.log(req.body)
+    console.log('Print all stored stops in JSON format')
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllStops, function(err, result) {
 
@@ -153,7 +157,8 @@ router.get('/getAllStops', function(req, res, next) {
 //probar si la relacion n-n de la base de datos funciona correctamente 
 
 router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
-    console.log('Route ID', req.query.route_id)
+    console.log('Print all Stopf from a specific route')
+    console.log('Route ID: ', req.query.route_id)
     pg.connect(database_URL, function(err, client, done) {
         client.query(getStopsFromRoute,[req.query.route_id], function(err, result) {
 
@@ -169,7 +174,8 @@ router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
 });
 
 router.get('/getBusLocation', function(req, res, next) {
-    console.log('bus ID', req.query.bus_id)
+    console.log('Print actual bus location in JSON format using the bus ID')
+    console.log('bus ID: ', req.query.bus_id)
     pg.connect(database_URL, function(err, client, done) {
         client.query(getBusLocation, [req.query.bus_id],function(err, result) {
                                 
@@ -185,7 +191,7 @@ router.get('/getBusLocation', function(req, res, next) {
 });
 
 router.get('/getAllMessages', function(req, res, next) {
-    console.log(req.body)
+    console.log('Print all stored messages in JSON format')
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllMessages, function(err, result) {
 
@@ -201,7 +207,7 @@ router.get('/getAllMessages', function(req, res, next) {
 });
 
 router.get('/getAllBuses', function(req, res, next) {
-    console.log(req.body)
+    console.log('Print all stored buses in JSON format')
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllBuses, function(err, result) {
 
@@ -217,7 +223,7 @@ router.get('/getAllBuses', function(req, res, next) {
 });
 
 router.get('/getAllDrivers', function(req, res, next) {
-    console.log(req.body)
+    console.log('Print all drivers in JSON format')
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllDrivers, function(err, result) {
 
@@ -232,13 +238,15 @@ router.get('/getAllDrivers', function(req, res, next) {
     });
 });
 
-
-
 //Routes for Update
 
 router.put('/updateStop', function(req, res, next) {
 
-    console.log("Enter to update Stop ",req.query.stop_id)
+
+    console.log('Update Stop with '+req.query.stop_id+' ID')
+    console.log('Set stop_name = ' +req.query.stop_name)
+    console.log('Set stop_description = '+req.query.stop_description)
+    console.log('Set stop_ID = '+ req.query.stop_id)
 
     pg.connect(database_URL, function(err, client, done) {
 
@@ -266,6 +274,8 @@ router.put('/updateStop', function(req, res, next) {
 });
 
 router.put('/updateRoute', function(req, res, next) {
+
+    console.log('Update route with '+req.query.route_id+ ' ID')
     console.log('Route ID ', req.query.route_id)
     console.log('Route Description ', req.query.route_description)
     console.log('Route Name ', req.query.route_name)
@@ -293,15 +303,16 @@ router.put('/updateRoute', function(req, res, next) {
     });
 });
 
-router.put('/updateBusAdmin', function(req, res, next) {
+router.put('/updateBus', function(req, res, next) {
 
+    console.log('Update bus with '+req.query.bus_id+ ' ID')
     console.log('Bus Name ', req.query.bus_name)
     console.log('Bus bus ID ', req.query.bus_name)
     console.log('Driver Id ', req.query.bus_name)
 
 
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateBusAdmin,[res.query.bus_name, res.query.bus_id, req.query.driver_id] ,function(err, result) {
+        client.query(updateBus,[res.query.bus_name, res.query.bus_id, req.query.driver_id] ,function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
@@ -323,7 +334,11 @@ router.put('/updateBusAdmin', function(req, res, next) {
 });
 
 router.put('/updateDriver', function(req, res, next) {
-    console.log(req.body)
+    
+    console.log('Update driver with '+req.query.driver_id+ ' ID')
+    console.log('Set Bus Name: ', req.query.driver_firstname)
+    console.log('Set Bus bus ID: ', req.query.last_name)
+
     pg.connect(database_URL, function(err, client, done) {
         client.query(updateDriver,[req.body.driver_firstname, req.body.last_name, req.body.driver_id] ,function(err, result) {
 
@@ -346,7 +361,8 @@ router.put('/updateDriver', function(req, res, next) {
         });
     });
 });
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//Set test logs
 router.put('/updateMessage', function(req, res, next) {
     console.log('Mensaje'+req.query.mesagge_text, 'ID del mensaje '+ req.query.mesagge_id)
     pg.connect(database_URL, function(err, client, done) {
@@ -451,7 +467,8 @@ router.post('/createDriver', function(req, res, next) {
 });
 
 router.post('/createBus', function(req, res, next) {
-    console.log(req.body)
+    console.log('Create a bus')
+    console.log(req.query.)
     pg.connect(database_URL, function(err, client, done) {
         client.query(createBus,[req.query.bus_name, req.query.driver_id, req.query.route_id, req.query.gps_id] ,function(err, result) {
 
