@@ -355,7 +355,6 @@ router.put('/updateDriver', function(req, res, next) {
     });
 });
 
-//Set test logs
 router.put('/updateMessage', function(req, res, next) {
     console.log('Mensaje'+req.query.mesagge_text, 'ID del mensaje '+ req.query.mesagge_id)
     pg.connect(database_URL, function(err, client, done) {
@@ -379,6 +378,155 @@ router.put('/updateMessage', function(req, res, next) {
         });
     });
 });
+
+router.put('/assignBustoDriver', function(req, res, next) {
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(assignBustoDriver,[req.query.bus_id,req.query.driver_id] ,function(err, result) {
+
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllDrivers, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
+                    done();
+                 }
+            });
+            done();
+            }
+        });
+    });
+});
+
+
+router.put('/assignRoutetoBus', function(req, res, next) {
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(assignRoutetoBus,[req.query.route_id,req.query.bus_id] ,function(err, result) {
+
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllBuses, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
+                    done();
+                 }
+            });
+            done();
+            }
+        });
+    });
+});
+
+////
+
+// router.put('/assignGPStoBus', function(req, res, next) {
+
+//     pg.connect(database_URL, function(err, client, done) {
+//         client.query(assignGPStoBus,[req.query.route_id,req.query.bus_id] ,function(err, result) {
+
+//            if (err)
+//              { console.error(err); response.send("Error " + err); }
+//             else{
+//                 client.query(getAllBuses, function(err, result){
+                
+//                 if(err)
+//                 { console.error(err); response.send("Error " + err); }
+                
+//                 else{
+//                     res.json(result.rows);
+//                     done();
+//                  }
+//             });
+//             done();
+//             }
+//         });
+//     });
+// });
+
+router.put('/changeBusStatus', function(req, res, next) {
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(changeBusStatus,[req.query.bus_status,req.query.bus_id] ,function(err, result) {
+
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllBuses, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
+                    done();
+                 }
+            });
+            done();
+            }
+        });
+    });
+});
+
+router.put('/changeRouteStatus', function(req, res, next) {
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(changeRouteStatus,[req.query.route_status,req.query.route_id] ,function(err, result) {
+
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllBuses, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
+                    done();
+                 }
+            });
+            done();
+            }
+        });
+    });
+});
+
+
+router.put('/assgignRoutetoPath', function(req, res, next) {
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(assgignRoutetoPath,[req.query.route_id,req.query.path_id] ,function(err, result) {
+
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllRoutes, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
+                    done();
+                 }
+            });
+            done();
+            }
+        });
+    });
+});
+
 
 
 //Routes for Add
@@ -505,6 +653,7 @@ router.post('/createBus', function(req, res, next) {
         });
     });
 });
+
 
 
 //Routes for delete
