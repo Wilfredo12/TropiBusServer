@@ -45,13 +45,13 @@ var pg = require("pg");
 const database_URL=  'postgres://wymxggcwikpwav:203bccfd54e249de1659cdcb1d99cac0f82a14eb9246b51bbef0c1598c46089d@ec2-54-83-205-71.compute-1.amazonaws.com:5432/dd0arpc8l5k2be'
 pg.defaults.ssl=true;
 
-//Routes for gets
+//Routes for gets okk
 var getAllRoutes = 'SELECT * FROM Route NATURAL JOIN routepath' //ok 
 var getRoute = 'SELECT * FROM route NATURAL JOIN routepath WHERE route_id = $1' //okx2
 var getAllStops = 'SELECT * FROM Stop' //ok
-//---------------------------- 
-var getStopsFromRoute = 'SELECT * FROM stop_routepath WHERE route_id=$1' //verify n-n realtion 
-//---------------------------- 
+
+var getStopsFromRoute = 'SELECT * FROM route_stop NATURAL JOIN stop NATURAL JOIN route WHERE route_id=$1' //verify n-n realtion 
+
 
 var getBusLocation = 'SELECT gps_latitude, gps_longitude FROM bus NATURAL JOIN GPS WHERE bus_id = $1' //ok
 var getAllMessages = 'SELECT * FROM Message' //ok
@@ -61,10 +61,10 @@ var getAllDrivers = 'SELECT * FROM driver' //ok
 
 //Routes for Update
 var updateStop = 'UPDATE stop SET stop_name=$1, stop_description=$2 WHERE stop_id=$3'//ok
-var updateRoute = 'UPDATE Route SET route_name=$1, route_description=$2 WHERE route_id=$3'//ok
-var updateBus = 'UPDATE Bus SET bus_name=$1,  WHERE bus_id=$3' //pendiente
+var updateRoute = 'UPDATE Route SET route_name=$1, route_description=$2, route_area=$3 WHERE route_id=$4'//ok
+var updateBus = 'UPDATE Bus SET bus_name=$1  WHERE bus_id=$2' //ok
 var updateDriver = 'UPDATE Driver SET driver_firstname=$1, driver_lastname=$2 WHERE driver_id=$3'//ok
-var updateMessage = 'UPDATE message SET message_text=$1 WHERE message_id=$2' 
+var updateMessage = 'UPDATE message SET message_text=$1, message_title = $2 WHERE message_id=$3' //ok
 
 //Routes for Add
 //var addStop = 'INSERT INTO Stop(stop_title, stop_description, stop_latitude, stop_longitude) VALUES (?,?,?,?)'
@@ -74,14 +74,17 @@ var updateMessage = 'UPDATE message SET message_text=$1 WHERE message_id=$2'
 var deleteStop = 'DELETE FROM Stop WHERE stop_id=$1'
 var deleteBus = 'DELETE FROM Bus WHERE bus_id=$1'
 var deleteMessage = 'DELETE FROM Message WHERE message_id=$1'
+var deleteDriver = 'DELETE FROM driver WHERE driver_id = $1'
+var deleteRoute = 'DELETE FROM route WHERE route_id = $1'
 
 //Routes for create
-var createDriver = 'INSERT INTO driver(driver_id, driver_firstname, driver_lastname, driver_username, driver_password, driver_status, bus_id) VALUES ($1,$2,$3,$4,$5,$6,$7)'
-var createBus = 'INSERT INTO bus(bus_id, bus_name, driver_id, route_id, gps_id) VALUES ($1,$2,$3,$4,$5)'
-var createRoute = 'INSERT INTO route(route_id, route_name, route_description) VALUES ($1,$2,$3)'
-var createStop = 'INSERT INTO Stop(stop_id,stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4,$5)'
-var addMessage = 'INSERT INTO Message(text, message_date) VALUES ($1,$2)'
+var createDriver = 'INSERT INTO driver(driver_firstname, driver_lastname, driver_username, driver_password) VALUES ($1,$2,$3,$4)'//ok
+var createBus = 'INSERT INTO bus(bus_name,  gps_id) VALUES ($1,$2)'///////////////////////////////
+var createRoute = 'INSERT INTO route(route_name, route_description) VALUES ($1,$2)'
+var createStop = 'INSERT INTO Stop(stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4)'//ok
+var addMessage = 'INSERT INTO Message(admin_id, message_text, message_date, message_title) VALUES ($1,$2, $3, $4)' //ok
 
+var createGPS =  'INSERT INTO GPS(gps_latitude, gps_longitude) VALUES(0,0) RETURNING gps_id'
 
 var adminLogin = ''
 var adminLogout = ''
@@ -91,14 +94,13 @@ var assignBustoDriver = 'UPDATE driver SET bus_id=$1 WHERE driver_id=$2'
 var assignRoutetoBus = 'UPDATE bus SET route_id=$1 WHERE bus_id=$2'
 var assignGPStoBus = 'UPDATE bus SET gps_id=$1 WHERE bus_id=$2'
 var assgignRoutetoPath = 'UPDATE bus SET route_id= $1 WHERE path_id=$2'
-
 var changeDriverStatus = 'UPDATE driver driver_status=$1 WHERE driver_id=1'
 var changeBusStatus = 'UPDATE bus SET bus_status=$1 WHERE bus_id=$2'
 
 
 //Routes for gets 
 router.get('/getAllRoute', function(req, res, next) {
-    console.log(req.body)
+    console.log('Print all stored routes in JSON format')
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllRoutes, function(err, result) {
 
@@ -114,7 +116,9 @@ router.get('/getAllRoute', function(req, res, next) {
 });
 
 router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
-    console.log('Route ID ', req.query.route_id)
+
+    console.log('Print an specific route and path in JSON format')
+    console.log('Route ID: ', req.query.route_id)
     
     pg.connect(database_URL, function(err, client, done) {
         client.query(getRoute, [req.query.route_id], function(err, result) {
@@ -125,7 +129,7 @@ router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
              { console.error(err); response.send("Error " + err); }
             else{
             res.json(result.rows);
-            console.log(result.rows)
+            //console.log(result.rows)
         
             done();
             }
@@ -134,7 +138,7 @@ router.get('/getRoute', function(req, res, next) { // Parameter: Route ID
 });
 
 router.get('/getAllStops', function(req, res, next) {
-    console.log(req.body)
+    console.log('Print all stored stops in JSON format')
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllStops, function(err, result) {
 
@@ -149,11 +153,9 @@ router.get('/getAllStops', function(req, res, next) {
 });
 
 
-/////////////////////////////////////////////
-//probar si la relacion n-n de la base de datos funciona correctamente 
-
 router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
-    console.log('Route ID', req.query.route_id)
+    console.log('Print all Stopf from a specific route')
+    console.log('Route ID: ', req.query.route_id)
     pg.connect(database_URL, function(err, client, done) {
         client.query(getStopsFromRoute,[req.query.route_id], function(err, result) {
 
@@ -169,7 +171,8 @@ router.get('/getStopsFromRoute', function(req, res, next) {//Parameter: Route ID
 });
 
 router.get('/getBusLocation', function(req, res, next) {
-    console.log('bus ID', req.query.bus_id)
+    console.log('Print actual bus location in JSON format using the bus ID')
+    console.log('bus ID: ', req.query.bus_id)
     pg.connect(database_URL, function(err, client, done) {
         client.query(getBusLocation, [req.query.bus_id],function(err, result) {
                                 
@@ -185,7 +188,7 @@ router.get('/getBusLocation', function(req, res, next) {
 });
 
 router.get('/getAllMessages', function(req, res, next) {
-    console.log(req.body)
+    console.log('Print all stored messages in JSON format')
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllMessages, function(err, result) {
 
@@ -201,7 +204,7 @@ router.get('/getAllMessages', function(req, res, next) {
 });
 
 router.get('/getAllBuses', function(req, res, next) {
-    console.log(req.body)
+    console.log('Print all stored buses in JSON format')
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllBuses, function(err, result) {
 
@@ -217,7 +220,7 @@ router.get('/getAllBuses', function(req, res, next) {
 });
 
 router.get('/getAllDrivers', function(req, res, next) {
-    console.log(req.body)
+    console.log('Print all drivers in JSON format')
     pg.connect(database_URL, function(err, client, done) {
         client.query(getAllDrivers, function(err, result) {
 
@@ -232,13 +235,15 @@ router.get('/getAllDrivers', function(req, res, next) {
     });
 });
 
-
-
 //Routes for Update
 
 router.put('/updateStop', function(req, res, next) {
 
-    console.log("Enter to update Stop ",req.query.stop_id)
+
+    console.log('Update Stop with '+req.query.stop_id+' ID')
+    console.log('Set stop_name = ' +req.query.stop_name)
+    console.log('Set stop_description = '+req.query.stop_description)
+    console.log('Set stop_ID = '+ req.query.stop_id)
 
     pg.connect(database_URL, function(err, client, done) {
 
@@ -266,12 +271,14 @@ router.put('/updateStop', function(req, res, next) {
 });
 
 router.put('/updateRoute', function(req, res, next) {
+
+    console.log('Update route with '+req.query.route_id+ ' ID')
     console.log('Route ID ', req.query.route_id)
     console.log('Route Description ', req.query.route_description)
     console.log('Route Name ', req.query.route_name)
 
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateRoute,[req.query.route_name, req.query.route_description, req.query.route_id] ,function(err, result) {
+        client.query(updateRoute,[req.query.route_name, req.query.route_description,req.query.route_area, req.query.route_id] ,function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
@@ -293,20 +300,19 @@ router.put('/updateRoute', function(req, res, next) {
     });
 });
 
-router.put('/updateBusAdmin', function(req, res, next) {
+router.put('/updateBus', function(req, res, next) {
 
     console.log('Bus Name ', req.query.bus_name)
-    console.log('Bus bus ID ', req.query.bus_name)
-    console.log('Driver Id ', req.query.bus_name)
-
+    console.log('Bus bus ID ', req.query.bus_id)
+ 
 
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateBusAdmin,[res.query.bus_name, res.query.bus_id, req.query.driver_id] ,function(err, result) {
+        client.query(updateBus,[req.query.bus_name, req.query.bus_id] ,function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
             else{
-                client.query(getBuses, function(err, result){
+                client.query(getAllBuses, function(err, result){
                 
                 if(err)
                 { console.error(err); response.send("Error " + err); }
@@ -323,9 +329,13 @@ router.put('/updateBusAdmin', function(req, res, next) {
 });
 
 router.put('/updateDriver', function(req, res, next) {
-    console.log(req.body)
+    
+    console.log('Update driver ID'+req.query.driver_id)
+    console.log('Set Driver Name: ', req.query.driver_firstname)
+    console.log('Set Driver lastname: ', req.query.driver_lastname)
+
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateDriver,[req.body.driver_firstname, req.body.last_name, req.body.driver_id] ,function(err, result) {
+        client.query(updateDriver,[req.query.driver_firstname, req.query.driver_lastname, req.query.driver_id] ,function(err, result) {
 
             if (err)
              { console.error(err); res.send("Error " + err); }
@@ -336,7 +346,7 @@ router.put('/updateDriver', function(req, res, next) {
                 { console.error(err); res.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
 
@@ -350,7 +360,7 @@ router.put('/updateDriver', function(req, res, next) {
 router.put('/updateMessage', function(req, res, next) {
     console.log('Mensaje'+req.query.mesagge_text, 'ID del mensaje '+ req.query.mesagge_id)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(updateMessage,[req.query.message_text, req.query.message_id] ,function(err, result) {
+        client.query(updateMessage,[req.query.message_text, req.query.message_title, req.query.message_id] ,function(err, result) {
 
            if (err)
              { console.error(err); response.send("Error " + err); }
@@ -371,14 +381,170 @@ router.put('/updateMessage', function(req, res, next) {
     });
 });
 
+router.put('/assignBustoDriver', function(req, res, next) {
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(assignBustoDriver,[req.query.bus_id,req.query.driver_id] ,function(err, result) {
+
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllDrivers, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
+                    done();
+                 }
+            });
+            done();
+            }
+        });
+    });
+});
+
+
+router.put('/assignRoutetoBus', function(req, res, next) {
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(assignRoutetoBus,[req.query.route_id,req.query.bus_id] ,function(err, result) {
+
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllBuses, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
+                    done();
+                 }
+            });
+            done();
+            }
+        });
+    });
+});
+
+////
+
+// router.put('/assignGPStoBus', function(req, res, next) {
+
+//     pg.connect(database_URL, function(err, client, done) {
+//         client.query(assignGPStoBus,[req.query.route_id,req.query.bus_id] ,function(err, result) {
+
+//            if (err)
+//              { console.error(err); response.send("Error " + err); }
+//             else{
+//                 client.query(getAllBuses, function(err, result){
+                
+//                 if(err)
+//                 { console.error(err); response.send("Error " + err); }
+                
+//                 else{
+//                     res.json(result.rows);
+//                     done();
+//                  }
+//             });
+//             done();
+//             }
+//         });
+//     });
+// });
+
+router.put('/changeBusStatus', function(req, res, next) {
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(changeBusStatus,[req.query.bus_status,req.query.bus_id] ,function(err, result) {
+
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllBuses, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
+                    done();
+                 }
+            });
+            done();
+            }
+        });
+    });
+});
+
+router.put('/changeRouteStatus', function(req, res, next) {
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(changeRouteStatus,[req.query.route_status,req.query.route_id] ,function(err, result) {
+
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllBuses, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
+                    done();
+                 }
+            });
+            done();
+            }
+        });
+    });
+});
+
+
+router.put('/assgignRoutetoPath', function(req, res, next) {
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(assgignRoutetoPath,[req.query.route_id,req.query.path_id] ,function(err, result) {
+
+           if (err)
+             { console.error(err); response.send("Error " + err); }
+            else{
+                client.query(getAllRoutes, function(err, result){
+                
+                if(err)
+                { console.error(err); response.send("Error " + err); }
+                
+                else{
+                    res.json(result.rows);
+                    done();
+                 }
+            });
+            done();
+            }
+        });
+    });
+});
+
+
 
 //Routes for Add
 
 router.post('/createStop', function(req, res, next) {
-    console.log(req.body)
+
+    console.log('CREATE STOP')
+
+    console.log('Stop Name '+req.query.stop_name)
+    console.log('Stop Description ', req.query.stop_description)
+    console.log('Stop Latitude ', req.query.stop_latitude)
+    console.log('Stop Longitude ', req.query.stop_longitude)
+
     pg.connect(database_URL, function(err, client, done) {
-        client.query(createStop,[req.body.stop_id,stop_name ,req.body.stop_description, req.body.stop_latitude, req.body.stop_longitude] ,function(err, result) {
-            
+        client.query(createStop,[req.query.stop_name ,req.query.stop_description, req.query.stop_latitude, req.query.stop_longitude] ,function(err, result) {
+        
             
             if (err)
              { console.error(err); response.send("Error " + err); }
@@ -389,7 +555,7 @@ router.post('/createStop', function(req, res, next) {
                 { console.error(err); response.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
             });
@@ -400,20 +566,28 @@ router.post('/createStop', function(req, res, next) {
 });
 
 router.post('/addMessage', function(req, res, next) {
-    console.log(req.body)
+
+
+     console.log('CREATE MESSAGE')
+
+    console.log('Message text '+req.query.message_text)
+    console.log('Message date', req.query.message_date)
+    console.log('Message Title ', req.query.message_title)
+     console.log('Admin ID ', req.query.admin_id)
+
     pg.connect(database_URL, function(err, client, done) {
-        client.query(addMessage,[req.body.mesagge_text, req.body.message_date_added] ,function(err, result) {
+        client.query(addMessage,[req.query.admin_id,req.query.message_text, req.query.message_date,req.query.message_title] ,function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
             else{
-                client.query(getMessages, function(err, result){
+                client.query(getAllMessages, function(err, result){
                 
                 if(err)
                 { console.error(err); response.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
             });
@@ -424,12 +598,19 @@ router.post('/addMessage', function(req, res, next) {
 });
 
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 router.post('/createDriver', function(req, res, next) {
-    console.log('Driver ID ', req.query.driver_id)
+
+    console.log('Create Driver')
+    console.log('Firstname: ', req.query.driver_firstname)
+    console.log('lastnameD ', req.query.driver_lastname)
+    console.log('username ', req.query.driver_username)
+    console.log('password ', req.query.driver_password)
+    console.log('status ', req.query.driver_status)
+    console.log('Bus id ', req.query.bus_id)
+        
+
     pg.connect(database_URL, function(err, client, done) {
-        client.query(createDriver,[req.query.driver_id,req.query.driver_firstname, req.query.driver_lastname,req.query.driver_username,req.query.driver_password,req.query.driver_status, req.query.bus_id] ,function(err, result) {
+        client.query(createDriver,[req.query.driver_firstname, req.query.driver_lastname,req.query.driver_username,req.query.driver_password] ,function(err, result) {
 
            if (err)
              { console.error(err); response.send("Error " + err); }
@@ -451,34 +632,63 @@ router.post('/createDriver', function(req, res, next) {
 });
 
 router.post('/createBus', function(req, res, next) {
-    console.log(req.body)
+    console.log('Create a bus')
+    //console.log(req.query.)
+    var id = 0
     pg.connect(database_URL, function(err, client, done) {
-        client.query(createBus,[req.query.bus_name, req.query.driver_id, req.query.route_id, req.query.gps_id] ,function(err, result) {
+         
+         client.query(createGPS, function(err, result) {
+
+            id = result.rows[0].gps_id
+
+             console.log("GPS ID" , id)
 
             if (err)
              { console.error(err); response.send("Error " + err); }
             else{
-                client.query(getBuses, function(err, result){
-                
-                if(err)
+                client.query(createBus,[req.query.bus_name, id] ,function(err, result){
+
+                     if(err)
                 { console.error(err); response.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
             });
             done();
             }
+                
+            //     if(err)
+            //     { console.error(err); response.send("Error " + err); }
+
+            //         else{
+            //         client.query(getAllBuses ,function(err, result){
+                    
+            //             if(err)
+            //             { console.error(err); response.send("Error " + err); }
+                        
+            //                 else{
+            //                     res.json(result.rows);
+            //                     done();
+            //                 }
+            //         });
+            //         done();
+            //     }
+            // });
+            // done();
+            // }
         });
     });
 });
 
 
+
 //Routes for delete
 
 router.delete('/deleteStop', function(req, res, next) {
-    console.log(req.body)
+    console.log('DELETE STOP')
+    console.log('Stop ID' ,req.query.stop_id)
     pg.connect(database_URL, function(err, client, done) {
         client.query(deleteStop,[req.query.stop_id] ,function(err, result) {
 
@@ -491,7 +701,7 @@ router.delete('/deleteStop', function(req, res, next) {
                 { console.error(err); response.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
             });
@@ -503,20 +713,20 @@ router.delete('/deleteStop', function(req, res, next) {
 
 
 router.delete('/deleteBus', function(req, res, next) {
-    console.log(req.body)
+    console.log('Bus ID ' ,req.query.bus_id)
     pg.connect(database_URL, function(err, client, done) {
-        client.query(deleteBus,[res.querty.bus_id] ,function(err, result) {
+        client.query(deleteBus,[req.query.bus_id] ,function(err, result) {
 
              if (err)
              { console.error(err); response.send("Error " + err); }
             else{
-                client.query(getBuses, function(err, result){
+                client.query(getAllBuses, function(err, result){
                 
                 if(err)
                 { console.error(err); response.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
             });
@@ -529,20 +739,20 @@ router.delete('/deleteBus', function(req, res, next) {
 
 
 router.delete('/deleteMessage', function(req, res, next) {
-    console.log(req.body)
+    console.log(req.query.mesagge_id)
     pg.connect(database_URL, function(err, client, done) {
         client.query(deleteMessage,[req.query.message_id] ,function(err, result) {
 
             if (err)
              { console.error(err); response.send("Error " + err); }
             else{
-                client.query(getMessages, function(err, result){
+                client.query(getAllMessages, function(err, result){
                 
                 if(err)
                 { console.error(err); response.send("Error " + err); }
                 
                 else{
-                    res.json(result.rows[0]);
+                    res.json(result.rows);
                     done();
                  }
             });
