@@ -72,14 +72,15 @@ var updateMessage = 'UPDATE message SET message_text=$1, message_title = $2 WHER
 
 //Routes for delete
 var deleteStop = 'DELETE FROM Stop WHERE stop_id=$1'
-var deleteBus = 'DELETE FROM Bus WHERE bus_id=$1'
+var deleteBus = 'DELETE FROM Bus WHERE bus_id=$1 RETURNING gps_id'
 var deleteMessage = 'DELETE FROM Message WHERE message_id=$1'
 var deleteDriver = 'DELETE FROM driver WHERE driver_id = $1'
 var deleteRoute = 'DELETE FROM route WHERE route_id = $1'
+var deleteGPS = 'DELETE FROM gps WHERE gps_id = $1'
 
 //Routes for create
 var createDriver = 'INSERT INTO driver(driver_firstname, driver_lastname, driver_username, driver_password) VALUES ($1,$2,$3,$4)'//ok
-var createBus = 'INSERT INTO bus(bus_name,  gps_id) VALUES ($1,$2)'///////////////////////////////
+var createBus = 'INSERT INTO bus(bus_name,  gps_id, bus_status) VALUES ($1,$2, $3)'///////////////////////////////
 var createRoute = 'INSERT INTO route(route_name, route_description) VALUES ($1,$2)'
 var createStop = 'INSERT INTO Stop(stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4)'//ok
 var addMessage = 'INSERT INTO Message(admin_id, message_text, message_date, message_title) VALUES ($1,$2, $3, $4)' //ok
@@ -635,18 +636,20 @@ router.post('/createBus', function(req, res, next) {
     console.log('Create a bus')
     //console.log(req.query.)
     var id = 0
+    var status
     pg.connect(database_URL, function(err, client, done) {
          
          client.query(createGPS, function(err, result) {
 
             id = result.rows[0].gps_id
+            status = 'inactive'
 
              console.log("GPS ID" , id)
 
             if (err)
              { console.error(err); response.send("Error " + err); }
             else{
-                client.query(createBus,[req.query.bus_name, id] ,function(err, result){
+                client.query(createBus,[req.query.bus_name, id, status] ,function(err, result){
 
                      if(err)
                 { console.error(err); response.send("Error " + err); }
@@ -714,13 +717,17 @@ router.delete('/deleteStop', function(req, res, next) {
 
 router.delete('/deleteBus', function(req, res, next) {
     console.log('Bus ID ' ,req.query.bus_id)
+
+    var id
     pg.connect(database_URL, function(err, client, done) {
         client.query(deleteBus,[req.query.bus_id] ,function(err, result) {
+
+            id = result.rows[0].gps_id
 
              if (err)
              { console.error(err); response.send("Error " + err); }
             else{
-                client.query(getAllBuses, function(err, result){
+                client.query(deleteGPS,[id], function(err, result){
                 
                 if(err)
                 { console.error(err); response.send("Error " + err); }
