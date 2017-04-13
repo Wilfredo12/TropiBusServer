@@ -87,8 +87,10 @@ var addMessage = 'INSERT INTO Message(admin_id, message_text, message_date, mess
 
 var createGPS =  'INSERT INTO GPS(gps_latitude, gps_longitude) VALUES(0,0) RETURNING gps_id'
 
-var adminLogin = ''
-var adminLogout = ''
+//Routes for login/logout 
+var checkCredentials= "SELECT admin_id FROM administrator WHERE admin_username=$1 and admin_password=$2"
+// var login = 'UPDATE admin SET driver_status = \'logged\' WHERE driver_id = $1'
+// var logout = 'UPDATE driver SET driver_status = \'not logged\' WHERE driver_id = $1'
 
 //assgign querties 
 var assignBustoDriver = 'UPDATE driver SET bus_id=$1 WHERE driver_id=$2'
@@ -768,6 +770,56 @@ router.delete('/deleteMessage', function(req, res, next) {
         });
     });
 });
+
+
+router.get('/login', function(req, res, next) {
+    console.log("entre al login")
+
+    console.log("User",req.query.admin_username)
+    console.log("User",req.query.admin_password)
+
+    pg.connect(database_URL, function(err, client, done) {
+        client.query(checkCredentials,[req.query.admin_username, req.query.admin_password] ,function(err, result) {
+
+            if (err)
+             { console.error(err); res.send("Error" + err); }
+           
+            else{
+             done()
+             
+             if(result.rows.length==0){
+                 res.json({admin:-1});
+                 done();
+             }
+
+             else{
+                var driverid=result.rows[0]               
+                console.log("admin ID",driverid)
+                res.json(driverid)
+                done();
+             }
+            }
+            
+        });
+    });
+});
+
+//loging out driver, updting driver status on database
+// router.put('/logout', function(req, res, next) {
+//     console.log("login out",req.body)
+//     pg.connect(database_URL, function(err, client, done) {
+//         client.query(logout,[req.body.driver_id] ,function(err, result) {
+
+//             if (err)
+//              { console.error(err); res.send("Error" + err); }
+//             else{
+//             res.json({"success":1});
+            
+//             done();
+//             }
+//         });
+//     });
+// });
 
 
 // var user={
