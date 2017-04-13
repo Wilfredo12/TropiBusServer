@@ -82,10 +82,12 @@ var deleteGPS = 'DELETE FROM gps WHERE gps_id = $1'
 var createDriver = 'INSERT INTO driver(driver_firstname, driver_lastname, driver_username, driver_password) VALUES ($1,$2,$3,$4)'//ok
 var createBus = 'INSERT INTO bus(bus_name,  gps_id, bus_status) VALUES ($1,$2, $3)'///////////////////////////////
 var createRoute = 'INSERT INTO route(route_name, route_description) VALUES ($1,$2)'
-var createStop = 'INSERT INTO Stop(stop_name,stop_description,stop_latitude,stop_longitude)VALUES($1,$2,$3,$4)'//ok
+var createStop = 'INSERT INTO Stop(stop_name,stop_description,stop_latitude,stop_longitude) VALUES($1,$2,$3,$4) RETURNING stop_id '//ok route_id
 var addMessage = 'INSERT INTO Message(admin_id, message_text, message_date, message_title) VALUES ($1,$2, $3, $4)' //ok
 
 var createGPS =  'INSERT INTO GPS(gps_latitude, gps_longitude) VALUES(0,0) RETURNING gps_id'
+
+var asignStopToRoute = 'INSERT INTO route_stop(route_id, stop_id) VALUES($1,$2)'
 
 //Routes for login/logout 
 var checkCredentials= "SELECT admin_id FROM administrator WHERE admin_username=$1 and admin_password=$2"
@@ -99,6 +101,8 @@ var assignGPStoBus = 'UPDATE bus SET gps_id=$1 WHERE bus_id=$2'
 var assgignRoutetoPath = 'UPDATE bus SET route_id= $1 WHERE path_id=$2'
 var changeDriverStatus = 'UPDATE driver driver_status=$1 WHERE driver_id=1'
 var changeBusStatus = 'UPDATE bus SET bus_status=$1 WHERE bus_id=$2'
+
+
 
 
 //Routes for gets 
@@ -539,20 +543,28 @@ router.put('/assgignRoutetoPath', function(req, res, next) {
 router.post('/createStop', function(req, res, next) {
 
     console.log('CREATE STOP')
-
     console.log('Stop Name '+req.query.stop_name)
     console.log('Stop Description ', req.query.stop_description)
     console.log('Stop Latitude ', req.query.stop_latitude)
     console.log('Stop Longitude ', req.query.stop_longitude)
 
+    console.log('route ID', req.query.route_id)
+
+    var stopID
+    var routeID 
+
     pg.connect(database_URL, function(err, client, done) {
         client.query(createStop,[req.query.stop_name ,req.query.stop_description, req.query.stop_latitude, req.query.stop_longitude] ,function(err, result) {
-        
             
+            stopID = result.rows[0].stop_id
+                console.log('Stop ID '+ stopID)
+
+            routeID = req.query.route_id
+
             if (err)
              { console.error(err); response.send("Error " + err); }
             else{
-                client.query(getAllStops, function(err, result){
+                client.query(asignStopToRoute, [routeID, stopID], function(err, result){
                 
                 if(err)
                 { console.error(err); response.send("Error " + err); }
