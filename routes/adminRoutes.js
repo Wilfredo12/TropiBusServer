@@ -60,7 +60,7 @@ var getAllDrivers = 'SELECT * FROM driver' //ok
 
 
 //Routes for Update
-var updateStop = 'UPDATE stop SET stop_name=$1, stop_description=$2 WHERE stop_id=$3'//ok
+var updateStop = 'UPDATE stop SET stop_name=$1, stop_description=$2, stop_latitude=$3, stop_longitude=$4 WHERE stop_id=$3'//ok
 var updateRoute = 'UPDATE Route SET route_name=$1, route_description=$2, route_area=$3 WHERE route_id=$4'//ok
 var updateBus = 'UPDATE Bus SET bus_name=$1  WHERE bus_id=$2' //ok
 var updateDriver = 'UPDATE Driver SET driver_firstname=$1, driver_lastname=$2 WHERE driver_id=$3'//ok
@@ -255,7 +255,7 @@ router.put('/updateStop', function(req, res, next) {
     pg.connect(database_URL, function(err, client, done) {
 
         //Update Stop
-        client.query(updateStop,[req.query.stop_name, req.query.stop_description, req.query.stop_id] ,function(err, result) {
+        client.query(updateStop,[req.query.stop_name, req.query.stop_description,req.query.stop_latitude, req.query.stop_longitude, req.query.stop_id] ,function(err, result) {
             if (err)
              { console.error(err); response.send("Error" + err); }
 
