@@ -51,10 +51,11 @@ router.get('/getAllRoutes', function(req, res, next) {
                 console.log("coji el status de las rutas")
                 var results=result.rows;
                 var tempResults=result1.rows;
+                console.log("routes status result",tempResults)
                 //if no buses are active set status of routes to inactive
                 if(tempResults.length==0){
                     for(var i=0;i<results.length;i++){
-                        results.status="Inactive"
+                        results[i].status="Inactive"
                     }
                 }
                 //some buses are active on some route

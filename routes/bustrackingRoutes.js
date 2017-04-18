@@ -86,13 +86,17 @@ router.put('/changeDriverRoute', function(req, res, next) {
         client.query(changeDriverRoute,[req.body.route_id,req.body.bus_id] ,function(err, result) {
 
             if (err)
-             { console.error(err); res.send("Error" + err); }
+             {
+                 console.error(err); res.send("Error" + err);
+             }
             
             else{
                 client.query(getDriverInfo,[req.body.driver_id] ,function(err, result) {
 
                 if (err)
-                { console.error(err); res.send("Error" + err); }
+                { 
+                    console.error(err); res.send("Error" + err);
+                }
                 else
                 res.json(result.rows[0]);
                 done();
@@ -110,12 +114,16 @@ router.put('/updateBusStatus', function(req, res, next) {
         client.query(updateBusStatus,[req.body.bus_status,req.body.bus_id] ,function(err, result) {
 
             if (err)
-             { console.error(err); res.send("Error" + err); }
+             { 
+                 console.error(err); res.send("Error" + err); 
+            }
             else{
                 client.query(getDriverInfo,[req.body.driver_id] ,function(err, result) {
 
                 if (err)
-                { console.error(err); res.send("Error" + err); }
+                { 
+                    console.error(err); res.send("Error" + err);
+                }
                 else{
                 res.json(result.rows[0]);
                 done();
