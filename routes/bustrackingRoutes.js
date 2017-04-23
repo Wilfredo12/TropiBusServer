@@ -198,18 +198,18 @@ router.post('/login', function(req, res, next) {
              else{
                 var driverid=result.rows[0]               
                  pg.connect(database_URL, function(err, client, done) {
-                        client.query(login,[req.body.driver_id] ,function(err, result) {
+                        client.query(login,[driverid.driver_id] ,function(err, result) {
 
                         if (err)
                             { console.error(err); res.send("Error" + err); }
                         else{
+                           console.log("driverid",driverid)
+                            res.json(driverid)
                             done();
                         }
                     });
                 });
-                console.log("driverid",driverid)
-                res.json(driverid)
-                done();
+                
              }
             }
             
