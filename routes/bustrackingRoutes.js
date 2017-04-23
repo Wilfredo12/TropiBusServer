@@ -24,7 +24,7 @@ pg.defaults.ssl=true;
 
 //Routes for get
 var getDriverInfo = 'SELECT driver_id, driver_firstname, driver_lastname, bus_id, bus_name,bus_status, route_id, route_name FROM bus NATURAL JOIN driver NATURAL JOIN route WHERE driver_id = $1' 
-var getRoutes = 'SELECT * FROM route' //SELECT route_id,route_name FROM route
+var getRoutes = 'SELECT route_name,route_id FROM route' //SELECT route_id,route_name FROM route
 var getDriverBusID = 'SELECT bus_id FROM driver WHERE driver_id = $1'
 var getGPSid = 'SELECT gps_id FROM bus WHERE bus_id = $1'
 
