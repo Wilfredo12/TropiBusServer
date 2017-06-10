@@ -55,6 +55,7 @@ router.get('/getDriverInfo', function(req, res, next) { // Parameter: Route ID
              { console.error(err); res.send("Error " + err); }
             else{
             res.json(result.rows[0]);
+            console.log(result.rows[0])
             done();
             }
         });
