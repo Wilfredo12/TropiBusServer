@@ -25,7 +25,7 @@ pg.defaults.ssl=true;
 
 
  
-var getStopsFromRoute = 'SELECT * FROM route_stop NATURAL JOIN stop WHERE route_id=$1 ORDER BY stop_name' 
+var getStopsFromRoute = 'SELECT * FROM route_stop NATURAL JOIN stop WHERE route_id=$1 ORDER BY stop_order' 
 var getBusLocation = 'SELECT gps_latitude, gps_longitude, bus_name,bus_status FROM bus NATURAL JOIN gps WHERE route_id=$1'
 var getMessages = 'SELECT * FROM message'
 var getAllRoutes = 'SELECT * FROM route NATURAL JOIN routepath ORDER BY route_area'
